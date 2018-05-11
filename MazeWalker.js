@@ -86,6 +86,8 @@ var init = function() {
 
     gl.uniform1i(uni.uDiffuseTex, 0);
 
+    maze = createMaze(32)
+
     // Start the animation sequence
     Promise.all([
         

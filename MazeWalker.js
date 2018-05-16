@@ -44,6 +44,7 @@ var getLocations = function(program, uni) {
     uni.uDiffuseTex = gl.getUniformLocation(program, "uDiffuseTex");
 }
 
+var HorizontalWallMaterial = new Material();
 /**
  * Initialize the WebGL context, load/compile shaders, and initialize our shapes.
  */
@@ -82,16 +83,20 @@ var init = function() {
     // Initialize the camera
     camera = new Camera( canvas.width / canvas.height );
 
+    HorizontalWallMaterial.diffuseTexture = "BlenderMockups/HorizontalWallUV.png";
+
     setupEventHandlers();
 
     gl.uniform1i(uni.uDiffuseTex, 0);
-
-    maze = createMaze(32)
+    var mazeSize = 32;
+    var pathSize = 15;
+    maze = createMaze(mazeSize)
 
     // Start the animation sequence
-    Promise.all([
+    Promise.all([Utils.loadTexture(gl, "BlenderMockups/HorizontalWallUV.png")
         
     ]).then (function(values) {
+        Textures["BlenderMockups/HorizontalWallUV.png"] = values[0];
         render();
     });
     
@@ -118,6 +123,7 @@ var render = function() {
 
     gl.uniform3fv(uni.uLightPos, Float32Array.from(lightPos)); // The overall lighting should be attatched to the player
 
+    
     drawScene();
 };
 
@@ -125,7 +131,12 @@ var render = function() {
  * Draw the objects in the scene.  
  */
 var drawScene = function() {
+    let model = mat4.create();
 
+
+    mat4.fromTranslation(model, vec3.fromValues(1.0,0.5,1.5));
+    gl.uniformMatrix4fv(uni.uModel, false, model);
+    Shapes.cube.render(gl,uni,HorizontalWallMaterial);
 };
 
 //////////////////////////////////////////////////

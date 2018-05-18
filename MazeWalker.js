@@ -93,10 +93,18 @@ var init = function() {
     maze = createMaze(mazeSize)
 
     // Start the animation sequence
-    Promise.all([Utils.loadTexture(gl, "BlenderMockups/HorizontalWallUV.png")
-        
+    Promise.all([
+        Utils.loadTexture(gl, "BlenderMockups/HorizontalWallUV.png"),
+        Utils.loadTexture(gl, "media/Cube/CubeTex.png"),
+        Obj.load(gl, "media/Cube/cube.obj")
     ]).then (function(values) {
         Textures["BlenderMockups/HorizontalWallUV.png"] = values[0];
+        Textures["CubeTex.png"] = values[1];
+        Shapes.skybox = values[2];
+        //Sets the meshes forcefully because the object loader is... whack sometimes.
+        Shapes.skybox.meshes.forEach( function(m) {
+            m.material.diffuseTexture = "CubeTex.png"
+        })
         render();
     });
     
@@ -137,6 +145,11 @@ var drawScene = function() {
     mat4.fromTranslation(model, vec3.fromValues(1.0,0.5,1.5));
     gl.uniformMatrix4fv(uni.uModel, false, model);
     Shapes.cube.render(gl,uni,HorizontalWallMaterial);
+
+    model = mat4.create();
+    mat4.scale(model, model, vec3.fromValues(0.5,0.5,0.5))
+    gl.uniformMatrix4fv(uni.uModel, false, model);
+    Shapes.skybox.render(gl, uni)
 };
 
 //////////////////////////////////////////////////

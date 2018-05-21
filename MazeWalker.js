@@ -5,6 +5,7 @@ var gl;
 var canvas;
 
 var camera;  // The camera
+var moveSpeed = 2.1;
 
 // Uniform variable locations
 var uni = {
@@ -86,6 +87,7 @@ var init = function() {
     HorizontalWallMaterial.diffuseTexture = "BlenderMockups/HorizontalWallUV.png";
 
     setupEventHandlers();
+    camera = new Camera( canvas.width / canvas.height );
 
     gl.uniform1i(uni.uDiffuseTex, 0);
     var mazeSize = 32;
@@ -118,7 +120,6 @@ var render = function() {
     window.requestAnimFrame(render, canvas);
 
     // Update camera when in fly mode
-    // TODO: Change method to move player as the camera is the playermodel (AKA there isn't one)
     updateCamera();
 
     // Clear the color and depth buffers
@@ -127,6 +128,7 @@ var render = function() {
     // Set projection and view matrices 
     gl.uniformMatrix4fv(uni.uView, false, camera.viewMatrix());
     gl.uniformMatrix4fv(uni.uProj, false, camera.projectionMatrix());
+
 
 
     gl.uniform3fv(uni.uLightPos, Float32Array.from(lightPos)); // The overall lighting should be attatched to the player
@@ -150,6 +152,11 @@ var drawScene = function() {
     mat4.scale(model, model, vec3.fromValues(0.5,0.5,0.5))
     gl.uniformMatrix4fv(uni.uModel, false, model);
     Shapes.skybox.render(gl, uni)
+    
+    //model = mat4.create();
+    //mat4.scale(model, model, vec3.fromValues(mazeSize,mazeSize,mazeSize))
+    //gl.uniformMatrix4fv(uni.uModel, false, model);
+    Shapes.quad.render(gl,uni);
 };
 
 //////////////////////////////////////////////////
@@ -234,7 +241,21 @@ var setupEventHandlers = function() {
  */
 var updateCamera = function() {
     if (downKeys.size) {
-        //Redo controls for walking to be "normal"
+        if (downKeys.has("Space")) {
+            camera.reset();   
+        }
+        if (downKeys.has("KeyA"))
+                camera.track(-moveSpeed, 0)
+        if (downKeys.has("KeyD"))
+                camera.track(moveSpeed, 0)
+        if (downKeys.has("KeyQ"))
+                camera.track(0, -moveSpeed);
+        if (downKeys.has("KeyE")) 
+                camera.track(0, moveSpeed);
+        if (downKeys.has("KeyW"))
+                camera.dolly(-moveSpeed / 16)
+        if (downKeys.has("KeyS"))
+                camera.dolly(moveSpeed / 16)
     }
 };
 

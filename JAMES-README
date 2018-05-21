@@ -1,15 +1,16 @@
 Hey James, I have what will likely be a lot of what's left of what you need to work on for the project planned out:
     1. Read the wallRenderer.js file's wallRenderer documentation, this you'll need to know it because you'll be creating 8 instances of that class
     2. Create a method (I really don't care what it's called or where it's put so long as its in a new file so we don't have github syncing problems)
-        To parse through a 2 dimensional array and replace each symbol with a working model, which will be all wallRenderers because the paths themeselves
-        Don't need to have a dedicated renderer. A symbol list will be attatched so you know what to replace and with what
-    3. Reimplement the basic camera controls (not collision)
+        To parse through a 2 dimensional array and replace each symbol with a working model, which will be all wallRenderers because the paths themselves
+        Don't need to have a dedicated renderer. A symbol list will be attached so you know what to replace and with what
+    3. Re implement the basic camera controls (not collision)
         I stripped too much away when I was converting this from PA-06, so can you please just get the camera able to move forward, left, right, up, down, and backwards?
-        Sorry about something so trivial, but it does need to be done as well. The preferable mapping would be the standard WASD mapping, but Q being ascend, and E being descend.
+        Sorry about something so trivial, but it does need to be done as well. !!!!
+d		The preferable mapping would be the standard WASD mapping, but Q being ascend, and E being descend.
     4. Finish the ground quad creation
         It should be (maze_size * 3 * path_size) in dimensions, and the texture coordinates should be (0,0), (0, maze_size), etc
 
-After that I should have everything ready on my part by saturday night. We may have to scrap the skybox for time, but everything else should be fine.
+After that I should have everything ready on my part by Saturday night. We may have to scrap the sky box for time, but everything else should be fine.
 
 
 Symbol Table (Orientation parameter of wallRenderer):

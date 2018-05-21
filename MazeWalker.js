@@ -7,6 +7,10 @@ var canvas;
 var camera;  // The camera
 var moveSpeed = 2.1;
 
+//maze constants
+var mazeSize = 32;
+var pathSize = 15;
+
 // Uniform variable locations
 var uni = {
     uModel: null,
@@ -90,23 +94,29 @@ var init = function() {
     camera = new Camera( canvas.width / canvas.height );
 
     gl.uniform1i(uni.uDiffuseTex, 0);
-    var mazeSize = 32;
-    var pathSize = 15;
-    maze = createMaze(mazeSize)
+
+    //maze = createMaze(mazeSize)
 
     // Start the animation sequence
     Promise.all([
-        Utils.loadTexture(gl, "BlenderMockups/HorizontalWallUV.png"),
+        Utils.loadTexture(gl, "media/HorizontalWall/HorizWallTex.png"),
         Utils.loadTexture(gl, "media/Cube/CubeTex.png"),
-        Obj.load(gl, "media/Cube/cube.obj")
+        Obj.load(gl, "media/Cube/cube.obj"),
+        Obj.load(gl, "media/HorizontalWall/HorizontalWall.obj")
     ]).then (function(values) {
-        Textures["BlenderMockups/HorizontalWallUV.png"] = values[0];
+        Textures["media/HorizontalWall/HorizWallTex.png"] = values[0];
         Textures["CubeTex.png"] = values[1];
         Shapes.skybox = values[2];
+        Shapes.HorizontalWall = values[3];
         //Sets the meshes forcefully because the object loader is... whack sometimes.
         Shapes.skybox.meshes.forEach( function(m) {
             m.material.diffuseTexture = "CubeTex.png"
         })
+        Shapes.HorizontalWall.meshes.forEach( function(m) {
+            m.material.diffuseTexture = "media/HorizontalWall/HorizWallTex.png"
+        })
+        console.log("Loaded all things.")
+        console.log(Shapes.HorizontalWall)
         render();
     });
     
@@ -149,14 +159,22 @@ var drawScene = function() {
     Shapes.cube.render(gl,uni,HorizontalWallMaterial);
 
     model = mat4.create();
-    mat4.scale(model, model, vec3.fromValues(0.5,0.5,0.5))
-    gl.uniformMatrix4fv(uni.uModel, false, model);
-    Shapes.skybox.render(gl, uni)
-    
-    //model = mat4.create();
-    //mat4.scale(model, model, vec3.fromValues(mazeSize,mazeSize,mazeSize))
+    mat4.translate(model, model, vec3.fromValues(0,50,0))
+    mat4.scale(model, model, vec3.fromValues(-50,-50,-50))
     //gl.uniformMatrix4fv(uni.uModel, false, model);
+    //Shapes.skybox.render(gl, uni)
+    
+    model = mat4.create();
+    mat4.scale(model, model, vec3.fromValues(mazeSize,mazeSize,mazeSize))
+    gl.uniformMatrix4fv(uni.uModel, false, model);
     Shapes.quad.render(gl,uni);
+
+    model = mat4.create();
+    gl.uniformMatrix4fv(uni.uModel, false, model);
+    Shapes.HorizontalWall.render(gl, uni);
+    mat4.translate(model,model,vec3.fromValues(0, 0, pathSize/8));
+    gl.uniformMatrix4fv(uni.uModel, false, model);
+    Shapes.HorizontalWall.render(gl,uni);
 };
 
 //////////////////////////////////////////////////
@@ -246,16 +264,20 @@ var updateCamera = function() {
         }
         if (downKeys.has("KeyA"))
                 camera.track(-moveSpeed, 0)
-        if (downKeys.has("KeyD"))
+        else if (downKeys.has("KeyD"))
                 camera.track(moveSpeed, 0)
         if (downKeys.has("KeyQ"))
                 camera.track(0, -moveSpeed);
-        if (downKeys.has("KeyE")) 
+        else if (downKeys.has("KeyE")) 
                 camera.track(0, moveSpeed);
-        if (downKeys.has("KeyW"))
-                camera.dolly(-moveSpeed / 16)
-        if (downKeys.has("KeyS"))
-                camera.dolly(moveSpeed / 16)
+        if (downKeys.has("KeyW")) {
+            camera.eye[0] = camera.eye[0] - (camera.rotation[2] / 12)
+            camera.eye[2] = camera.eye[2] - (camera.rotation[10] / 12)
+        }
+        else if (downKeys.has("KeyS")) {
+            camera.eye[0] = camera.eye[0] + (camera.rotation[2] / 12)
+            camera.eye[2] = camera.eye[2] + (camera.rotation[10] / 12)
+        }
     }
 };
 
@@ -265,7 +287,7 @@ var updateCamera = function() {
  */
 var mouseDrag = function () {
     if (mouseState.button == 2) {
-        camera.turn(mouseState.x - mouseState.prevX, mouseState.y - mouseState.prevY);
+        camera.turn((mouseState.x - mouseState.prevX) / 2, (mouseState.y - mouseState.prevY) / 2);
     }
 };
 

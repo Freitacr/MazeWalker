@@ -172,7 +172,8 @@ var drawScene = function() {
     model = mat4.create();
     gl.uniformMatrix4fv(uni.uModel, false, model);
     Shapes.HorizontalWall.render(gl, uni);
-    mat4.translate(model,model,vec3.fromValues(0, 0, pathSize/8));
+    mat4.translate(model,model,vec3.fromValues(0, 0, pathSize));
+    mat4.scale(model, model, vec3.fromValues(pathSize, pathSize, pathSize))
     gl.uniformMatrix4fv(uni.uModel, false, model);
     Shapes.HorizontalWall.render(gl,uni);
 };

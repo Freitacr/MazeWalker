@@ -102,21 +102,30 @@ var init = function() {
         Utils.loadTexture(gl, "media/HorizontalWall/HorizWallTex.png"),
         Utils.loadTexture(gl, "media/Cube/CubeTex.png"),
         Obj.load(gl, "media/Cube/cube.obj"),
-        Obj.load(gl, "media/HorizontalWall/HorizontalWall.obj")
+        Obj.load(gl, "media/HorizontalWall/HorizontalWall.obj"),
+        Obj.load(gl, "media/ElbowWall/ElbowWall.obj")
     ]).then (function(values) {
         Textures["media/HorizontalWall/HorizWallTex.png"] = values[0];
         Textures["CubeTex.png"] = values[1];
         Shapes.skybox = values[2];
         Shapes.HorizontalWall = values[3];
-        //Sets the meshes forcefully because the object loader is... whack sometimes.
+        Shapes.ElbowWall = values[4];
+        //Sets the meshes' materials forcefully because the object loader is... whack sometimes.
         Shapes.skybox.meshes.forEach( function(m) {
             m.material.diffuseTexture = "CubeTex.png"
         })
         Shapes.HorizontalWall.meshes.forEach( function(m) {
-            m.material.diffuseTexture = "media/HorizontalWall/HorizWallTex.png"
+            m.material.diffuseTexture = "media/HorizontalWall/HorizWallTex.png" 
         })
+        console.log(mazeDef1);
         console.log("Loaded all things.")
         console.log(Shapes.HorizontalWall)
+
+        Shapes.maze = constructPrebuiltMaze(mazeDef1);
+        //console.log(Shapes.maze)
+        symbolToMaze(Shapes.maze, Shapes.HorizontalWall, Shapes.ElbowWall);
+
+
         render();
     });
     
@@ -169,13 +178,30 @@ var drawScene = function() {
     gl.uniformMatrix4fv(uni.uModel, false, model);
     Shapes.quad.render(gl,uni);
 
+
+    
+    for (let i = 0; i < Shapes.maze.length; i++) {
+        for (let j = 0; j < Shapes.maze.length; j++) {
+            if (Shapes.maze[i][j] !== "p" && Shapes.maze[i][j] !== "pe") {
+                //console.log(Shapes.maze[i][j])
+                model = mat4.create();
+                mat4.scale(model, model, vec3.fromValues(pathSize/2, pathSize/2, pathSize/2))
+                mat4.translate(model, model, vec3.fromValues(i * pathSize/8, 0, j * pathSize/8));
+                mat4.rotateY(model, model, glMatrix.toRadian(90 * Shapes.maze[i][j].orientation))
+                gl.uniformMatrix4fv(uni.uModel, false, model);
+                Shapes.maze[i][j].render(gl, uni)
+            }
+        }
+    }
+    
+    /*
     model = mat4.create();
     gl.uniformMatrix4fv(uni.uModel, false, model);
     Shapes.HorizontalWall.render(gl, uni);
-    mat4.translate(model,model,vec3.fromValues(0, 0, pathSize));
-    mat4.scale(model, model, vec3.fromValues(pathSize, pathSize, pathSize))
+    mat4.translate(model,model,vec3.fromValues(0, 0, pathSize/7));
     gl.uniformMatrix4fv(uni.uModel, false, model);
     Shapes.HorizontalWall.render(gl,uni);
+    */
 };
 
 //////////////////////////////////////////////////
@@ -272,12 +298,12 @@ var updateCamera = function() {
         else if (downKeys.has("KeyE")) 
                 camera.track(0, moveSpeed);
         if (downKeys.has("KeyW")) {
-            camera.eye[0] = camera.eye[0] - (camera.rotation[2] / 12)
-            camera.eye[2] = camera.eye[2] - (camera.rotation[10] / 12)
+            camera.eye[0] = camera.eye[0] - (camera.rotation[2])
+            camera.eye[2] = camera.eye[2] - (camera.rotation[10])
         }
         else if (downKeys.has("KeyS")) {
-            camera.eye[0] = camera.eye[0] + (camera.rotation[2] / 12)
-            camera.eye[2] = camera.eye[2] + (camera.rotation[10] / 12)
+            camera.eye[0] = camera.eye[0] + (camera.rotation[2])
+            camera.eye[2] = camera.eye[2] + (camera.rotation[10])
         }
     }
 };
@@ -287,7 +313,7 @@ var updateCamera = function() {
  * currently down.
  */
 var mouseDrag = function () {
-    if (mouseState.button == 2) {
+    if (mouseState.button == 0) {
         camera.turn((mouseState.x - mouseState.prevX) / 2, (mouseState.y - mouseState.prevY) / 2);
     }
 };

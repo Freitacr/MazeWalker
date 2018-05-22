@@ -115,14 +115,26 @@ var init = function() {
             m.material.diffuseTexture = "CubeTex.png"
         })
         Shapes.HorizontalWall.meshes.forEach( function(m) {
-            m.material.diffuseTexture = "media/HorizontalWall/HorizWallTex.png" 
+            // Since texturing is still massively broken, remove the texture and install a basic colour instead
+            //m.material.diffuseTexture = "media/HorizontalWall/HorizWallTex.png" 
+            m.material.diffuse = vec3.fromValues(0.7, 0.3, 0.3);
+            m.material.specular = vec3.fromValues(0.02, 0.02, 0.02);
         })
-        console.log(mazeDef1);
-        console.log("Loaded all things.")
-        console.log(Shapes.HorizontalWall)
+        Shapes.ElbowWall.meshes.forEach( function(m) {
+            m.material.diffuse = vec3.fromValues(0.7, 0.3, 0.3);
+            m.material.specular = vec3.fromValues(0.02, 0.02, 0.02);
+        })
 
-        Shapes.maze = constructPrebuiltMaze(mazeDef1);
+
+        Shapes.maze = constructPrebuiltMaze(mazeDef1[0]);
+        console.log(mazeDef1[0])
+        let startingPos = mazeDef1[1];
+        console.log(startingPos);
+        console.log(startingPos[0] * (pathSize/2))
         //console.log(Shapes.maze)
+        camera.eye = vec3.fromValues(96.5, 1.25, 96.5)
+        //camera.lookAt(vec3.fromValues(startingPos[0] * (pathSize/2), 0.75, startingPos[1] * (pathSize/2)), vec3.fromValues(0,0,0), vec3.fromValues(0,1,0) )
+        //console.log(camera.eye)
         symbolToMaze(Shapes.maze, Shapes.HorizontalWall, Shapes.ElbowWall);
 
 
@@ -170,7 +182,7 @@ var drawScene = function() {
     model = mat4.create();
     mat4.translate(model, model, vec3.fromValues(0,50,0))
     mat4.scale(model, model, vec3.fromValues(-50,-50,-50))
-    //gl.uniformMatrix4fv(uni.uModel, false, model);
+    //gl.uniformMatrix4fv(uni.uModel, false, model);jm
     //Shapes.skybox.render(gl, uni)
     
     model = mat4.create();
@@ -194,6 +206,8 @@ var drawScene = function() {
         }
     }
     
+
+    //console.log(camera.eye)
     /*
     model = mat4.create();
     gl.uniformMatrix4fv(uni.uModel, false, model);
@@ -286,9 +300,6 @@ var setupEventHandlers = function() {
  */
 var updateCamera = function() {
     if (downKeys.size) {
-        if (downKeys.has("Space")) {
-            camera.reset();   
-        }
         if (downKeys.has("KeyA"))
                 camera.track(-moveSpeed, 0)
         else if (downKeys.has("KeyD"))
